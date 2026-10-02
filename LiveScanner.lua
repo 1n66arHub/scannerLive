@@ -1,7 +1,7 @@
 -- ============================================
--- FULL LIVE SCANNER v10.1 — LIGHTWEIGHT FINAL FIXED
+-- FULL LIVE SCANNER v10.2 — FINAL POSITION FIX
 -- Anti-spam + Smart diff + Hemat resource
--- Fix: typeof() removed untuk Delta Executor
+-- Fix: typeof() removed + GUI position fixed
 -- ============================================
 
 local Players = game:GetService("Players")
@@ -209,12 +209,23 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "FullLiveScan"
 gui.ResetOnSpawn = false
 gui.DisplayOrder = 997
+gui.IgnoreGuiInset = true     -- v10.2: biar gak kena status bar
 pcall(function() gui.Parent = game:GetService("CoreGui") end)
 if not gui.Parent then gui.Parent = lp:WaitForChild("PlayerGui") end
 
+-- ============ AUTO-CLAMP POSITION ============
+local VIEW = workspace.CurrentCamera.ViewportSize
+local FRAME_W = 310
+local FRAME_H = 420
+local startX = 10
+local startY = 100  -- v10.2 FIX: 100 pixel dari atas (bukan 5%)
+if startY + FRAME_H > VIEW.Y then
+    startY = math.max(50, VIEW.Y - FRAME_H - 20)
+end
+
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 310, 0, 420)
-frame.Position = UDim2.new(0, 10, 0.05, 0)
+frame.Size = UDim2.new(0, FRAME_W, 0, FRAME_H)
+frame.Position = UDim2.new(0, startX, 0, startY)  -- v10.2 FIX
 frame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 frame.BackgroundTransparency = 0.1
 frame.BorderSizePixel = 0
@@ -282,7 +293,6 @@ Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
 local function fullKill()
     State.destroyed = true
     State.running = false
-    -- v10.1 FIX: hapus typeof() check → langsung pcall
     for r, conn in pairs(_G._LS_hooks or {}) do
         pcall(function() conn:Disconnect() end)
     end
@@ -486,10 +496,10 @@ local collapsed = false
 collapse.MouseButton1Click:Connect(function()
     collapsed = not collapsed
     if collapsed then
-        frame.Size = UDim2.new(0, 310, 0, 30)
+        frame.Size = UDim2.new(0, FRAME_W, 0, 30)
         collapse.Text = "+"
     else
-        frame.Size = UDim2.new(0, 310, 0, 420)
+        frame.Size = UDim2.new(0, FRAME_W, 0, FRAME_H)
         collapse.Text = "−"
     end
 end)
@@ -1102,5 +1112,5 @@ renderLog()
 renderInfo()
 renderHook()
 
-print("⚡ [LiveScan v10] Loaded! Lightweight + Anti-spam AKTIF.")
+print("⚡ [LiveScan v10.2] Loaded! Position fixed.")
 print("   × = full stop | ON/OFF = toggle | PAUSE = pause scan")
