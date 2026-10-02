@@ -1,6 +1,7 @@
 -- ============================================
--- FULL LIVE SCANNER v10 — LIGHTWEIGHT FINAL
+-- FULL LIVE SCANNER v10.1 — LIGHTWEIGHT FINAL FIXED
 -- Anti-spam + Smart diff + Hemat resource
+-- Fix: typeof() removed untuk Delta Executor
 -- ============================================
 
 local Players = game:GetService("Players")
@@ -22,11 +23,11 @@ end
 -- ============ CONFIG ============
 local CFG = {
     -- Performance
-    ScanInterval = 1.5,          -- v10: naik dari 1.0 → 1.5 (hemat CPU)
-    RenderInterval = 1.5,        -- v10: render log tiap 1.5s (bukan tiap scan)
-    InfoInterval = 5,            -- v10: refresh info tiap 5s
-    HookInterval = 5,            -- v10: refresh hook tiap 5s
-    MaxLines = 25,               -- v10: turun dari 30 (render lebih ringan)
+    ScanInterval = 1.5,
+    RenderInterval = 1.5,
+    InfoInterval = 5,
+    HookInterval = 5,
+    MaxLines = 25,
     MaxBuffer = 400,
     Radius = 100,
 
@@ -281,10 +282,9 @@ Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
 local function fullKill()
     State.destroyed = true
     State.running = false
+    -- v10.1 FIX: hapus typeof() check → langsung pcall
     for r, conn in pairs(_G._LS_hooks or {}) do
-        if typeof(conn) == "RBXScriptConnection" then
-            pcall(function() conn:Disconnect() end)
-        end
+        pcall(function() conn:Disconnect() end)
     end
     _G._LS_hooks = nil
     pcall(function() gui:Destroy() end)
